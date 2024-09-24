@@ -1,0 +1,251 @@
+<html>
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+        <title>weather</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
+    <body>
+        <form id="form1">
+            <div class="text-center mb-3">
+                <label>選一個年份，將會用此年到2023的資料去預測本日的降雨狀況</label>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-2">
+                    <select class="form-select" id="sel" name="sel">
+                        <!-- <option >選一個年份，將會用此年到2023的資料去預測本日的降雨狀況</option> -->
+                        <option selected value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                        <option value="2019">2019</option>
+                        <option value="2018">2018</option>
+                        <option value="2017">2017</option>
+                        <option value="2016">2016</option>
+                        <option value="2015">2015</option>
+                        <option value="2014">2014</option>
+                        <option value="2013">2013</option>
+                        <option value="2012">2012</option>
+                        <option value="2011">2011</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-3" id="submit">預測</button>
+                </div>
+            </div>
+
+            <script> 
+                document.getElementById('form1').addEventListener('submit', function (e) {
+                    w = document.getElementById('wait')
+                    w.style.display = 'block';
+                    s = document.getElementById('submit')
+                    s.disabled = true
+                    e.preventDefault(); // 阻止表單提交
+                    var formData = new FormData(this);
+
+                    fetch('/', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        var responseData = JSON.parse(data);
+                        console.log(responseData.now)
+                        console.log(responseData.p)
+                        console.log(responseData.p2)
+                        la1 = document.getElementById('la1')
+                        la1.style.display = 'block';
+                        la2 = document.getElementById('la2')
+                        la2.style.display = 'block';
+                        la2.textContent = '以' + responseData.y.toString() + '-2023的資料預測今日降雨量結果'
+                        la3 = document.getElementById('la3')
+                        la3.style.display = 'block';
+                        la3.textContent = '以' + responseData.y.toString() + '-2023的資料預測明日降雨量結果'
+
+                        var containerDiv = document.getElementById('con');
+                        containerDiv.innerHTML = '';
+                        
+                        for (var i = 1; i <= 6; i++) {
+                            var rowDiv = document.createElement('div');
+                            rowDiv.className = 'row';
+
+                            var labelDiv = document.createElement('div');
+                            labelDiv.className = 'col-2';
+
+                            var progressDiv = document.createElement('div');
+                            progressDiv.className = 'progress mb-3';
+                            progressDiv.setAttribute('role', 'progressbar');
+                            progressDiv.setAttribute('aria-label', 'Info Example 35px high with label');
+                            progressDiv.setAttribute('aria-valuemin', '0');
+                            progressDiv.setAttribute('aria-valuemax', '100');
+                            progressDiv.style='height: 35px; font-size: 26px;';
+
+                            var progressBarDiv = document.createElement('div');
+                            progressBarDiv.className = 'progress-bar bg-info overflow-visible text-dark text-center';
+                            progressBarDiv.style='font-size: 26px;';
+                            
+
+                            if (i == 1){
+                                var d = responseData.now[i] * 100 / 40
+                                progressBarDiv.setAttribute('aria-valuenow', (d * 100).toString());
+                                progressBarDiv.style.width = d.toString() + '%';
+                                progressBarDiv.textContent = responseData.now[i].toFixed(2) + '度';
+                                labelDiv.textContent = '溫度'
+                            }
+                            if (i == 2){
+                                var d = responseData.now[i] * 100 / 360
+                                progressBarDiv.setAttribute('aria-valuenow', d.toString());
+                                progressBarDiv.style.width = d.toString() + '%';
+                                progressBarDiv.textContent = responseData.now[i].toFixed(2) + '度';
+                                labelDiv.textContent = '風向'
+                            }
+                            if (i == 3){
+                                var d = responseData.now[i] * 100 / 15
+                                progressBarDiv.setAttribute('aria-valuenow', d.toString());
+                                progressBarDiv.style.width = d.toString() + '%';
+                                progressBarDiv.textContent = responseData.now[i].toFixed(2) + 'm/s';
+                                labelDiv.textContent = '風力'
+                            }
+                            if (i == 4){
+                                var d = responseData.now[i] * 100 / 30
+                                progressBarDiv.setAttribute('aria-valuenow', d.toString());
+                                progressBarDiv.style.width = d.toString() + '%';
+                                progressBarDiv.textContent = responseData.now[i].toFixed(2) + 'km';
+                                labelDiv.textContent = '能見度'
+                            }
+                            if (i == 5){
+                                var d = responseData.now[i] * 100 / 100
+                                progressBarDiv.setAttribute('aria-valuenow', d.toString());
+                                progressBarDiv.style.width = d.toString() + '%';
+                                progressBarDiv.textContent = responseData.now[i].toFixed(2) + '%';
+                                labelDiv.textContent = '濕度'
+                            }
+                            if (i == 6){
+                                var d = (responseData.now[i] - 980) * 100 / 60
+                                progressBarDiv.setAttribute('aria-valuenow', d.toString());
+                                progressBarDiv.style.width = d.toString() + '%';
+                                progressBarDiv.textContent = responseData.now[i].toFixed(2) + 'hPa';
+                                labelDiv.textContent = '氣壓'
+                            }
+
+                            progressDiv.appendChild(progressBarDiv);
+                            rowDiv.appendChild(labelDiv)
+                            rowDiv.appendChild(progressDiv)
+                            containerDiv.appendChild(rowDiv);
+                        }
+
+
+                        var containerDiv = document.getElementById('con2');
+                        containerDiv.innerHTML = '';
+                        
+                        for (var i = 0; i <= 1; i++) {
+                            var rowDiv = document.createElement('div');
+                            rowDiv.className = 'row';
+
+                            var labelDiv = document.createElement('div');
+                            labelDiv.className = 'col-2';
+
+                            var progressDiv = document.createElement('div');
+                            progressDiv.className = 'progress mb-3';
+                            progressDiv.setAttribute('role', 'progressbar');
+                            progressDiv.setAttribute('aria-label', 'Info Example 35px high with label');
+                            progressDiv.setAttribute('aria-valuemin', '0');
+                            progressDiv.setAttribute('aria-valuemax', '100');
+                            progressDiv.style='height: 35px; font-size: 26px;';
+
+                            var progressBarDiv = document.createElement('div');
+                            progressBarDiv.className = 'progress-bar bg-info overflow-visible text-dark text-center';
+                            progressBarDiv.style='font-size: 26px;';
+                            
+
+                            if (i == 0){
+                                var d = responseData.p[i] * 100 / 24
+                                progressBarDiv.setAttribute('aria-valuenow', (d * 100).toString());
+                                progressBarDiv.style.width = d.toString() + '%';
+                                progressBarDiv.textContent = responseData.p[i].toFixed(2) + 'hr';
+                                labelDiv.textContent = '降雨時長'
+                            }
+                            if (i == 1){
+                                var d = responseData.p[i] * 100 / 340
+                                progressBarDiv.setAttribute('aria-valuenow', d.toString());
+                                progressBarDiv.style.width = d.toString() + '%';
+                                progressBarDiv.textContent = responseData.p[i].toFixed(2) + 'mm';
+                                labelDiv.textContent = '降雨量'
+                            }
+
+                            progressDiv.appendChild(progressBarDiv);
+                            rowDiv.appendChild(labelDiv)
+                            rowDiv.appendChild(progressDiv)
+                            containerDiv.appendChild(rowDiv);
+                        }
+
+                        var containerDiv = document.getElementById('con3');
+                        containerDiv.innerHTML = '';
+                        
+                        for (var i = 0; i <= 1; i++) {
+                            var rowDiv = document.createElement('div');
+                            rowDiv.className = 'row';
+
+                            var labelDiv = document.createElement('div');
+                            labelDiv.className = 'col-2';
+
+                            var progressDiv = document.createElement('div');
+                            progressDiv.className = 'progress mb-3';
+                            progressDiv.setAttribute('role', 'progressbar');
+                            progressDiv.setAttribute('aria-label', 'Info Example 35px high with label');
+                            progressDiv.setAttribute('aria-valuemin', '0');
+                            progressDiv.setAttribute('aria-valuemax', '100');
+                            progressDiv.style='height: 35px; font-size: 26px;';
+
+                            var progressBarDiv = document.createElement('div');
+                            progressBarDiv.className = 'progress-bar bg-info overflow-visible text-dark text-center';
+                            progressBarDiv.style='font-size: 26px;';
+                            
+
+                            if (i == 0){
+                                var d = responseData.p2[i] * 100 / 24
+                                progressBarDiv.setAttribute('aria-valuenow', (d * 100).toString());
+                                progressBarDiv.style.width = d.toString() + '%';
+                                progressBarDiv.textContent = responseData.p2[i].toFixed(2) + 'hr';
+                                labelDiv.textContent = '降雨時長'
+                            }
+                            if (i == 1){
+                                var d = responseData.p2[i] * 100 / 340
+                                progressBarDiv.setAttribute('aria-valuenow', d.toString());
+                                progressBarDiv.style.width = d.toString() + '%';
+                                progressBarDiv.textContent = responseData.p2[i].toFixed(2) + 'mm';
+                                labelDiv.textContent = '降雨量'
+                            }
+
+                            progressDiv.appendChild(progressBarDiv);
+                            rowDiv.appendChild(labelDiv)
+                            rowDiv.appendChild(progressDiv)
+                            containerDiv.appendChild(rowDiv);
+                        }
+
+                        w.style.display = 'none';
+                        s.disabled = false
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            </script>
+        </form>
+
+        <div class="text-center mb-3" id="wait" style="display: none;">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="fs-1 mb-3">predicting, please wait</p>
+        </div>
+
+        <p class="fs-1 mb-3" id="la1" style="display: none;">本日資料</p>
+        <div id="con"></div>
+        <p class="fs-1 mb-3" id="la2" style="display: none;"></p>
+        <div id="con2"></div>
+        <p class="fs-1 mb-3" id="la3" style="display: none;"></p>
+        <div id="con3"></div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    </body>
+</html>
